@@ -55,6 +55,7 @@ fun TaskFlow() {
     // State to hold the list of tasks
     var taskList by remember { mutableStateOf(listOf<String>()) }
     var currentTask by remember { mutableStateOf("") }
+    var taskDate by remember { mutableStateOf("") }
 
     Column(modifier = Modifier.padding(16.dp)) {
         // Input field for new tasks
@@ -62,14 +63,20 @@ fun TaskFlow() {
             currentTask = it
         }
 
+        DateInputField(taskDate) {
+            taskDate = it
+        }
+
         Spacer(modifier = Modifier.height(8.dp))
 
         // Button to add the new task to the list
         Button(
             onClick = {
-                if (currentTask.isNotBlank()) {
+                if (currentTask.isNotBlank() && taskDate.isNotBlank()) {
+                    currentTask += "\nDue: " + taskDate
                     taskList = taskList + currentTask
                     currentTask = ""
+                    taskDate = ""
                 }
             },
             modifier = Modifier.fillMaxWidth()
@@ -93,6 +100,18 @@ fun TaskInputField(task: String, onTaskChange: (String) -> Unit) {
         onValueChange = onTaskChange,
         modifier = Modifier.fillMaxWidth(),
         label = { Text(text = "Enter a new task") },
+        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { /* Handle IME action here */ })
+    )
+}
+
+@Composable
+fun DateInputField(date: String, onTaskChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = date,
+        onValueChange = onTaskChange,
+        modifier = Modifier.fillMaxWidth(),
+        label = { Text(text = "Enter due date") },
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = { /* Handle IME action here */ })
     )
