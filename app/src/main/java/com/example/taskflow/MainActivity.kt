@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -115,14 +116,23 @@ fun TaskItem(task: String, onRemove: (String) -> Unit) {
             .padding(vertical = 4.dp)
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 text = task,
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier
+                    .weight(1f)
+                    .alignByBaseline()
+
             )
-            Button(onClick = { onRemove(task) }) {
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+                onClick = { onRemove(task) },
+                modifier = Modifier.alignByBaseline()
+            ) {
                 Text("Done")
             }
         }
