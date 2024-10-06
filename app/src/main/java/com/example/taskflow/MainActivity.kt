@@ -4,7 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -77,7 +79,9 @@ fun TaskFlow() {
         Spacer(modifier = Modifier.height(16.dp))
 
         // List of tasks
-        TaskList(taskList)
+        TaskList(tasks = taskList) { task ->
+            taskList = taskList.filter { it != task }
+        }
     }
 }
 
@@ -94,14 +98,14 @@ fun TaskInputField(task: String, onTaskChange: (String) -> Unit) {
 }
 
 @Composable
-fun TaskList(tasks: List<String>) {
+fun TaskList(tasks: List<String>, onTaskRemove: (String) -> Unit) {
     LazyColumn {
-        items(tasks.size) { index -> TaskItem1(task = tasks[index]) }
+        items(tasks.size) { index -> TaskItem1(task = tasks[index], onRemove = onTaskRemove) }
     }
 }
 
 @Composable
-fun TaskItem(task: String) {
+fun TaskItem(task: String, onRemove: (String) -> Unit) {
     Card(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 4.dp
@@ -110,9 +114,17 @@ fun TaskItem(task: String) {
             .fillMaxWidth()
             .padding(vertical = 4.dp)
     ) {
-        Text(
-            text = task,
-            modifier = Modifier.padding(16.dp)
-        )
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = task,
+                modifier = Modifier.padding(16.dp)
+            )
+            Button(onClick = { onRemove(task) }) {
+                Text("Done")
+            }
+        }
     }
 }
