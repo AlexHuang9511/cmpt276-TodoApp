@@ -39,6 +39,11 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.res.painterResource
+import android.app.DatePickerDialog
+import android.widget.DatePicker
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.platform.LocalContext
+import java.util.Calendar
 
 class MainActivity : ComponentActivity() {
 
@@ -157,14 +162,24 @@ fun TaskInputField(task: String, onTaskChange: (String) -> Unit) {
 }
 
 @Composable
-fun DateInputField(date: String, onTaskChange: (String) -> Unit) {
-    OutlinedTextField(
-        value = date,
-        onValueChange = onTaskChange,
-        modifier = Modifier.fillMaxWidth(),
-        label = { Text(text = "Enter due date") },
-        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-        keyboardActions = KeyboardActions(onDone = { /* Handle IME action here */ })
+fun DateInputField(date: String, onDateChange: (String) -> Unit) {
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
+
+    val year = calendar.get(Calendar.YEAR)
+    val month = calendar.get(Calendar.MONTH)
+    val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+    val datePickerDialog = DatePickerDialog(
+        context,
+        { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDayOfMonth: Int ->
+            onDateChange("$selectedYear/${selectedMonth + 1}/$selectedDayOfMonth")
+        }, year, month, day
+    )
+
+    Text(
+        text = date.ifEmpty { "Choose a Date" },
+        modifier = Modifier.fillMaxWidth().clickable { datePickerDialog.show() }.padding(16.dp)
     )
 }
 
