@@ -1,6 +1,11 @@
 # To do app called TaskFlow
 
-- Alex
+Team members
+- Hao Cheng (Alexander) Huang
+- Andrew Lam
+- Hsueh-Liang Chang
+- Seungyeop Shin
+- Tey Cia Meng
 
 ## Things to implement / requirements
 - [x] allow user to input text
