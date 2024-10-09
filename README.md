@@ -31,8 +31,8 @@ To run the app, clone the repo and open Android Studio and run the app there (wi
 
 ## Screenshots
 
-[Empty list](./images/emptyList.png)
-[Adding one task](./images/oneTask.png)
-[Adding multiple tasks](./images/twoTask.png)
-[Select due Date](./images/dateSelect.png)
+![Empty list](./images/emptyList.png)
+![Adding one task](./images/oneTask.png)
+![Adding multiple tasks](./images/twoTask.png)
+![Select due Date](./images/dateSelect.png)
 
