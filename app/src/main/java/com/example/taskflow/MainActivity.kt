@@ -42,6 +42,7 @@ import androidx.compose.ui.res.painterResource
 import android.app.DatePickerDialog
 import android.widget.DatePicker
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.width
 import androidx.compose.ui.platform.LocalContext
 import java.util.Calendar
 
