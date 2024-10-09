@@ -19,7 +19,7 @@ Team members
 
 ## Retrospective
 
-This was most of our first time using GitHub's version control in a group setting so there were some troubles we ran into. Through this, we have learned a lot about the git system and how it operates. Also, this is our first time working with Koltin and the android ecosystem. I think for a basic to-do list app, our group has done pretty well. QA was done every time a pull request was made. This ensured that our main branch was always working. 
+This was most of our first time using GitHub's version control in a group setting so there were some troubles we ran into. Through this, we have learned a lot about the git system and how it operates. Also, this is our first time working with Kotlin and the android ecosystem. I think for a basic to-do list app, our group has done pretty well. QA was done every time a pull request was made. This ensured that our main branch was always working. 
 
 ## Running the App
 
