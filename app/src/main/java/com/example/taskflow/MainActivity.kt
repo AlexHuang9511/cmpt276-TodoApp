@@ -19,6 +19,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider//for slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -32,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.taskflow.ui.theme.TaskflowTheme
 import com.example.taskflow.TaskItem as TaskItem1
+
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -39,12 +41,18 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.res.painterResource
-import android.app.DatePickerDialog
-import android.widget.DatePicker
+
+import android.app.DatePickerDialog//for date picker
+import android.widget.DatePicker//for date picker
+
 import androidx.compose.foundation.clickable
+
 import androidx.compose.foundation.layout.width
+
+import androidx.compose.runtime.mutableFloatStateOf
+
 import androidx.compose.ui.platform.LocalContext
-import java.util.Calendar
+import java.util.Calendar//for now date
 
 class MainActivity : ComponentActivity() {
 
@@ -71,6 +79,7 @@ fun TaskFlow() {
     var taskList by remember { mutableStateOf(listOf<String>()) }
     var currentTask by remember { mutableStateOf("") }
     var taskDate by remember { mutableStateOf("") }
+    var taskImportance by remember { mutableFloatStateOf(0f) }
 
     Column(modifier = Modifier.padding(16.dp)) {
         // Input field for new tasks
@@ -85,15 +94,22 @@ fun TaskFlow() {
         }
 
         Spacer(modifier = Modifier.height(8.dp))
+        //importance slider
+        ImportanceSlider(taskImportance) {
+            taskImportance = it
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Button to add the new task to the list
         Button(
             onClick = {
                 if (currentTask.isNotBlank() && taskDate.isNotBlank()) {
-                    currentTask += "\nDue: " + taskDate
+                    currentTask += "\nDue: " + taskDate + "\nImportance: " + taskImportance.toInt()
                     taskList = taskList + currentTask
                     currentTask = ""
                     taskDate = ""
+                    taskImportance = 0f
                 }
             },
             modifier = Modifier.fillMaxWidth()
@@ -180,14 +196,34 @@ fun DateInputField(date: String, onDateChange: (String) -> Unit) {
 
     Text(
         text = date.ifEmpty { "Choose a Date" },
-        modifier = Modifier.fillMaxWidth().clickable { datePickerDialog.show() }.padding(16.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { datePickerDialog.show() }
+            .padding(16.dp)
     )
+}
+
+@Composable
+fun ImportanceSlider(importance: Float, onImportanceChange: (Float) -> Unit) {
+    Column {
+        Text("Importance: ${importance.toInt()}")
+        Slider(
+            value = importance,
+            onValueChange = onImportanceChange,
+            //importance slider is for 0 to 3, i think it is enough
+            valueRange = 0f..3f,
+            steps = 2,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
 }
 
 @Composable
 fun TaskList(tasks: List<String>, onTaskRemove: (String) -> Unit) {
     LazyColumn {
-        items(tasks.size) { index -> TaskItem1(task = tasks[index], onRemove = onTaskRemove) }
+        items(tasks.size) { index ->
+            TaskItem1(task = tasks[index], onRemove = onTaskRemove)
+        }
     }
 }
 
@@ -214,6 +250,7 @@ fun TaskItem(task: String, onRemove: (String) -> Unit) {
                     .alignByBaseline()
 
             )
+
             Spacer(modifier = Modifier.width(8.dp))
             Button(
                 onClick = { onRemove(task) },
