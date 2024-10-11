@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -46,9 +47,7 @@ import android.app.DatePickerDialog//for date picker
 import android.widget.DatePicker//for date picker
 
 import androidx.compose.foundation.clickable
-
-import androidx.compose.foundation.layout.width
-
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.mutableFloatStateOf
 
 import androidx.compose.ui.platform.LocalContext
@@ -80,6 +79,8 @@ fun TaskFlow() {
     var currentTask by remember { mutableStateOf("") }
     var taskDate by remember { mutableStateOf("") }
     var taskImportance by remember { mutableFloatStateOf(0f) }
+    var isEditing by remember { mutableStateOf(false) }
+    var editIndex by remember { mutableStateOf(-1) }
 
     Column(modifier = Modifier.padding(16.dp)) {
         // Input field for new tasks
@@ -89,9 +90,6 @@ fun TaskFlow() {
             currentTask = it
         }
 
-        DateInputField(taskDate) {
-            taskDate = it
-        }
 
         Spacer(modifier = Modifier.height(8.dp))
         //importance slider
@@ -105,8 +103,17 @@ fun TaskFlow() {
         Button(
             onClick = {
                 if (currentTask.isNotBlank() && taskDate.isNotBlank()) {
-                    currentTask += "\nDue: " + taskDate + "\nImportance: " + taskImportance.toInt()
-                    taskList = taskList + currentTask
+                    if (isEditing) {
+                        taskList = taskList.toMutableList().apply {
+                            set(editIndex, "$currentTask\nDue: $taskDate\nImportance: ${taskImportance.toInt()}")
+                        }
+                        isEditing = false
+                        editIndex = -1
+                    }
+                    else {
+                        currentTask += "\nDue: " + taskDate + "\nImportance: " + taskImportance.toInt()
+                        taskList = taskList + currentTask
+                    }
                     currentTask = ""
                     taskDate = ""
                     taskImportance = 0f
@@ -114,22 +121,28 @@ fun TaskFlow() {
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Add Task")
+            Text(if (isEditing) "Edit Task" else "Add Task")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // List of tasks
-        TaskList(tasks = taskList) { task ->
+        TaskList(tasks = taskList, onTaskRemove = { task ->
             taskList = taskList.filter { it != task }
-        }
+        }, onTaskEdit = { task, index ->
+            currentTask = task.substringBefore("\nDue:")
+            taskDate = task.substringAfter("\nDue: ").substringBefore("\n")
+            taskImportance = task.substringAfter("Importance: ").toFloat()
+            isEditing = true
+            editIndex = index
+        })
     }
 
     MaterialTheme {
         Column {
             TopAppBar(
                 title = {
-                    Text(text = "AppBar")
+                    Text(text = "TaskFlow")
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
                 navigationIcon = {
@@ -138,11 +151,8 @@ fun TaskFlow() {
                     }
                 },
                 actions = {
-                    AppBarIcon(R.drawable.baseline_share_24) {
-
-                    }
-                    AppBarIcon(R.drawable.baseline_edit_24) {
-
+                    AppBarDateIcon(taskDate) {
+                        selectedDate -> taskDate = selectedDate
                     }
                     AppBarIcon(R.drawable.baseline_more_vert_24) {
 
@@ -179,7 +189,7 @@ fun TaskInputField(task: String, onTaskChange: (String) -> Unit) {
 }
 
 @Composable
-fun DateInputField(date: String, onDateChange: (String) -> Unit) {
+fun AppBarDateIcon(taskDate: String, onDateChange: (String) -> Unit) {
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
@@ -194,13 +204,13 @@ fun DateInputField(date: String, onDateChange: (String) -> Unit) {
         }, year, month, day
     )
 
-    Text(
-        text = date.ifEmpty { "Choose a Date" },
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { datePickerDialog.show() }
-            .padding(16.dp)
-    )
+    IconButton(onClick = { datePickerDialog.show() }) {
+        Icon(
+            painter = painterResource(id = R.drawable.baseline_edit_calendar_24),
+            contentDescription = "Choose Date",
+            modifier = Modifier.size(24.dp)
+        )
+    }
 }
 
 @Composable
@@ -219,16 +229,20 @@ fun ImportanceSlider(importance: Float, onImportanceChange: (Float) -> Unit) {
 }
 
 @Composable
-fun TaskList(tasks: List<String>, onTaskRemove: (String) -> Unit) {
+fun TaskList(tasks: List<String>, onTaskRemove: (String) -> Unit, onTaskEdit: (String, Int) -> Unit) {
     LazyColumn {
-        items(tasks.size) { index ->
-            TaskItem1(task = tasks[index], onRemove = onTaskRemove)
+        itemsIndexed(tasks) { index, task ->
+            TaskItem1(
+                task = task,
+                onRemove = { onTaskRemove(task) },
+                onEdit = { onTaskEdit(task, index) }
+            )
         }
     }
 }
 
 @Composable
-fun TaskItem(task: String, onRemove: (String) -> Unit) {
+fun TaskItem(task: String, onRemove: (String) -> Unit, onEdit: () -> Unit) {
     Card(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 4.dp
@@ -237,7 +251,7 @@ fun TaskItem(task: String, onRemove: (String) -> Unit) {
             .fillMaxWidth()
             .padding(vertical = 4.dp)
     ) {
-        Row(
+        Row (
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
@@ -248,8 +262,17 @@ fun TaskItem(task: String, onRemove: (String) -> Unit) {
                 modifier = Modifier
                     .weight(1f)
                     .alignByBaseline()
-
             )
+        Row (
+            horizontalArrangement = Arrangement.End) {
+            Button(
+                onClick = onEdit,
+                modifier = Modifier.padding(end = 8.dp)
+            ) {
+                Text("Edit")
+            }
+
+        }
 
             Spacer(modifier = Modifier.width(8.dp))
             Button(
