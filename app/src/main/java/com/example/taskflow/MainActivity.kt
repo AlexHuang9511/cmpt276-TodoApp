@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -37,25 +36,21 @@ import com.example.taskflow.TaskItem as TaskItem1
 
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.res.painterResource
 
-import android.app.DatePickerDialog//for date picker
-import android.view.Display.Mode
-import android.widget.DatePicker//for date picker
+import android.app.DatePickerDialog
+import android.widget.DatePicker
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.ui.focus.focusModifier
 
 import androidx.compose.ui.platform.LocalContext
-import java.util.Calendar//for now date
+import java.util.Calendar
 
 class MainActivity : ComponentActivity() {
 
@@ -203,34 +198,6 @@ fun TaskFlow() {
     }
 }
 
-
-
-
-@Composable
-fun DateInputField(date:String, onDateChange: (String) -> Unit) {
-    val context = LocalContext.current
-    val calendar = Calendar.getInstance()
-
-    val year = calendar.get(Calendar.YEAR)
-    val month = calendar.get(Calendar.MONTH)
-    val day = calendar.get(Calendar.DAY_OF_MONTH)
-
-    val datePickerDialog = DatePickerDialog(
-        context,
-        { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDayOfMonth: Int ->
-            onDateChange("$selectedYear/${selectedMonth + 1}/$selectedDayOfMonth")
-        }, year, month, day
-    )
-
-    Text(
-        text = if (date.isNotBlank()) "Due Date: $date" else "Choose Date",
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { datePickerDialog.show() }
-            .padding(16.dp)
-    )
-}
-
 @Composable
 fun AppBarIcon(icon: Int, onClick: () -> Unit) {
     IconButton(onClick = onClick) {
@@ -256,7 +223,7 @@ fun TaskInputField(task: String, onTaskChange: (String) -> Unit) {
 }
 
 @Composable
-fun AppBarDateIcon(taskDate: String, onDateChange: (String) -> Unit) {
+fun AppBarDateIcon(task: String, onDateChange: (String) -> Unit) {
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
@@ -293,19 +260,6 @@ fun ImportanceSlider(importance: Float, onImportanceChange: (Float) -> Unit) {
             steps = 2,
             modifier = Modifier.fillMaxWidth()
         )
-    }
-}
-
-@Composable
-fun TaskList(tasks: List<Task>, onTaskRemove: (Task) -> Unit, onTaskEdit: (Task, Int) -> Unit) {
-    LazyColumn {
-        itemsIndexed(tasks) { index, task ->
-            TaskItem1(
-                task = task,
-                onRemove = { onTaskRemove(task) },
-                onEdit = { onTaskEdit(task, index) }
-            )
-        }
     }
 }
 
