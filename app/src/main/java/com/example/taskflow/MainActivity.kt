@@ -223,7 +223,7 @@ fun TaskInputField(task: String, onTaskChange: (String) -> Unit) {
 }
 
 @Composable
-fun AppBarDateIcon(task: String, onDateChange: (String) -> Unit) {
+fun AppBarDateIcon(taskDate: String, onDateChange: (String) -> Unit) {
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
@@ -246,6 +246,10 @@ fun AppBarDateIcon(task: String, onDateChange: (String) -> Unit) {
             contentDescription = "Choose Date",
             modifier = Modifier.size(24.dp)
         )
+
+        if(taskDate.isNotBlank()) {
+            Text(text = "Selected: $taskDate")
+        }
     }
 }
 
@@ -255,7 +259,6 @@ fun ImportanceSlider(importance: Float, onImportanceChange: (Float) -> Unit) {
         Slider(
             value = importance,
             onValueChange = onImportanceChange,
-            //importance slider is for 0 to 3, i think it is enough
             valueRange = 0f..3f,
             steps = 2,
             modifier = Modifier.fillMaxWidth()
