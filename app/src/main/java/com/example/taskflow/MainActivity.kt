@@ -246,10 +246,6 @@ fun AppBarDateIcon(taskDate: String, onDateChange: (String) -> Unit) {
             contentDescription = "Choose Date",
             modifier = Modifier.size(24.dp)
         )
-
-        if(taskDate.isNotBlank()) {
-            Text(text = "Selected: $taskDate")
-        }
     }
 }
 
