@@ -43,6 +43,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.ui.res.painterResource
 
 import android.app.DatePickerDialog//for date picker
+import android.content.Context
+import android.content.SharedPreferences
 import android.widget.DatePicker//for date picker
 
 import androidx.compose.foundation.clickable
@@ -52,7 +54,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.mutableFloatStateOf
 
 import androidx.compose.ui.platform.LocalContext
+import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken
 import java.util.Calendar//for now date
+
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
 class MainActivity : ComponentActivity() {
 
@@ -67,16 +75,27 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@Serializable
+data class Task(
+    val currTask: String,
+    val date: String,
+    val importance: Float
+)
+
+private const val PREFS_NAME = "task_prefs"
+private const val TASKS_KEY = "tasks"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(
     showBackground = true,
     showSystemUi = true
 )
-
 @Composable
 fun TaskFlow() {
+    val context = LocalContext.current
+
     // State to hold the list of tasks
-    var taskList by remember { mutableStateOf(listOf<String>()) }
+    var taskList by remember { mutableStateOf(loadTasks(context)) }
     var currentTask by remember { mutableStateOf("") }
     var taskDate by remember { mutableStateOf("") }
     var taskImportance by remember { mutableFloatStateOf(0f) }
@@ -105,8 +124,19 @@ fun TaskFlow() {
         Button(
             onClick = {
                 if (currentTask.isNotBlank() && taskDate.isNotBlank()) {
+                    /*
                     currentTask += "\nDue: " + taskDate + "\nImportance: " + taskImportance.toInt()
                     taskList = taskList + currentTask
+                    currentTask = ""
+                    taskDate = ""
+                    taskImportance = 0f
+                    */
+                    val newTask = Task(currentTask, taskDate, taskImportance)
+
+                    taskList = taskList + newTask
+
+                    saveTasks(context, taskList)
+
                     currentTask = ""
                     taskDate = ""
                     taskImportance = 0f
@@ -211,15 +241,40 @@ fun ImportanceSlider(importance: Float, onImportanceChange: (Float) -> Unit) {
             value = importance,
             onValueChange = onImportanceChange,
             //importance slider is for 0 to 3, i think it is enough
-            valueRange = 0f..3f,
-            steps = 2,
+            // alex - made it 5 for a good round number
+            valueRange = 0f..5f,
+            steps = 4,
             modifier = Modifier.fillMaxWidth()
         )
     }
 }
 
+// save tasks into storage
+fun saveTasks(context: Context, tasks: List<Task>) {
+    val sharedPreferences: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    val editor = sharedPreferences.edit()
+    val json = Json.encodeToString(tasks)  // Serialize task list to JSON
+    editor.putString(TASKS_KEY, json)
+    editor.apply()
+}
+
+// get tasks from storage
+fun loadTasks(context: Context): List<Task> {
+    val sharedPreferences: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    val json = sharedPreferences.getString(TASKS_KEY, null)
+    return if (json != null) {
+        try {
+            Json.decodeFromString(json)  // Deserialize JSON back to a list of Task objects
+        } catch (e: Exception) {
+            emptyList()
+        }
+    } else {
+        emptyList()  // Return empty list if no tasks are saved
+    }
+}
+
 @Composable
-fun TaskList(tasks: List<String>, onTaskRemove: (String) -> Unit) {
+fun TaskList(tasks: List<Task>, onTaskRemove: (Task) -> Unit) {
     LazyColumn {
         items(tasks.size) { index ->
             TaskItem1(task = tasks[index], onRemove = onTaskRemove)
@@ -228,7 +283,7 @@ fun TaskList(tasks: List<String>, onTaskRemove: (String) -> Unit) {
 }
 
 @Composable
-fun TaskItem(task: String, onRemove: (String) -> Unit) {
+fun TaskItem(task: Task, onRemove: (Task) -> Unit) {
     Card(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 4.dp
@@ -243,13 +298,13 @@ fun TaskItem(task: String, onRemove: (String) -> Unit) {
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = task,
-                modifier = Modifier
-                    .weight(1f)
-                    .alignByBaseline()
+            Column (modifier = Modifier.weight(1f)) {
+                Text(text = task.currTask)
+                Text(text = "Due: ${task.date}")
+                Text(text = "Importance: ${task.importance.toInt()}")
 
-            )
+            }
+
 
             Spacer(modifier = Modifier.width(8.dp))
             Button(
