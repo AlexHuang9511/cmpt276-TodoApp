@@ -131,6 +131,7 @@ fun TaskFlow() {
                     taskDate = ""
                     taskImportance = 0f
                     */
+                    // need to remove task in memory as well
                     val newTask = Task(currentTask, taskDate, taskImportance)
 
                     taskList = taskList + newTask
@@ -275,9 +276,14 @@ fun loadTasks(context: Context): List<Task> {
 
 @Composable
 fun TaskList(tasks: List<Task>, onTaskRemove: (Task) -> Unit) {
+    val context = LocalContext.current
     LazyColumn {
         items(tasks.size) { index ->
-            TaskItem1(task = tasks[index], onRemove = onTaskRemove)
+            TaskItem1(task = tasks[index]) { taskToRemove ->
+                onTaskRemove(taskToRemove)
+
+                saveTasks(context, tasks.filter { it != taskToRemove })
+            }
         }
     }
 }
