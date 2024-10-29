@@ -1,5 +1,6 @@
 package com.example.taskflow
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -52,10 +53,21 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.ui.platform.LocalContext
 import java.util.Calendar
 
+import android.content.SharedPreferences
+import androidx.compose.runtime.mutableIntStateOf
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+
+private lateinit var sharedPreferences: SharedPreferences
+private val gson = Gson()
+
 class MainActivity : ComponentActivity() {
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        sharedPreferences = getSharedPreferences("taskflow_prefs", MODE_PRIVATE)
         enableEdgeToEdge()
         setContent {
             TaskflowTheme {
@@ -71,6 +83,7 @@ data class Task(
     val importance: Float
 )
 
+@SuppressLint("AutoboxingStateCreation")
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(
     showBackground = true,
@@ -80,12 +93,12 @@ data class Task(
 @Composable
 fun TaskFlow() {
     // State to hold the list of tasks
-    var taskList by remember { mutableStateOf(listOf<Task>()) }
+    var taskList by remember { mutableStateOf(loadTasks()) }
     var currentTask by remember { mutableStateOf("") }
     var taskDate by remember { mutableStateOf("") }
     var taskImportance by remember { mutableFloatStateOf(0f) }
-    var isEditing by remember { mutableStateOf(false) }
-    var editIndex by remember { mutableStateOf(-1) }
+    var isEditing by remember { mutableStateOf<Boolean>(false) }
+    var editIndex by remember { mutableIntStateOf(-1) }
     var showWarning by remember { mutableStateOf(false) }
 
     TopAppBar(
@@ -155,6 +168,7 @@ fun TaskFlow() {
                         } else {
                             taskList = taskList + newTask
                         }
+                        saveTasks(taskList)
                         currentTask = ""
                         taskImportance = 0f
                     }
@@ -171,7 +185,9 @@ fun TaskFlow() {
             itemsIndexed(taskList) { index, task ->
                 TaskItem1(
                     task = task,
-                    onRemove = { taskList = taskList.filter { it != task} },
+                    onRemove = { taskList = taskList.filter { it != task}
+                        saveTasks(taskList)
+                               },
                     onEdit = {
                         currentTask = task.name
                         taskDate = task.dueDate
@@ -197,6 +213,14 @@ fun TaskFlow() {
         }
     }
 }
+
+// Function to save tasks to shared preferences
+private fun saveTasks(taskList: List<Task>) {
+    val json = gson.toJson(taskList)
+    sharedPreferences.edit().putString("task_list", json).apply()
+}
+
+
 
 @Composable
 fun AppBarIcon(icon: Int, onClick: () -> Unit) {
