@@ -221,6 +221,13 @@ private fun saveTasks(taskList: List<Task>) {
 }
 
 
+// Function to load tasks from shared preferences
+private fun loadTasks(): List<Task> {
+    val json = sharedPreferences.getString("task_list", null) ?: return emptyList()
+    val type = object : TypeToken<List<Task>>() {}.type
+    return gson.fromJson(json, type)
+}
+
 
 @Composable
 fun AppBarIcon(icon: Int, onClick: () -> Unit) {
