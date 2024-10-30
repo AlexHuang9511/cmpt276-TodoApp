@@ -283,7 +283,10 @@ fun TaskInputField(task: String, onTaskChange: (String) -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         label = { Text(text = "Enter a new task") },
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-        keyboardActions = KeyboardActions(onDone = { /* Handle IME action here */ })
+        keyboardActions = KeyboardActions(onDone = { /* Handle IME action here */ }),
+        maxLines = 5, // set line limit to 5
+        singleLine = false
+
     )
 }
 
