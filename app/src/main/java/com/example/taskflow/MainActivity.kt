@@ -1,5 +1,6 @@
 package com.example.taskflow
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -36,24 +37,57 @@ import com.example.taskflow.TaskItem as TaskItem1
 
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.res.painterResource
 
-import android.app.DatePickerDialog//for date picker
-import android.widget.DatePicker//for date picker
+import android.app.DatePickerDialog
+import android.widget.DatePicker
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.mutableFloatStateOf
+
 import androidx.compose.ui.platform.LocalContext
-import java.util.Calendar//for now date
+import java.util.Calendar
+
+import android.content.SharedPreferences
+import android.widget.ArrayAdapter
+import android.widget.Spinner
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.text2.input.rememberTextFieldState
+import androidx.compose.foundation.text2.input.setTextAndPlaceCursorAtEnd
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.core.content.ContentProviderCompat.requireContext
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import kotlin.math.exp
+
+private lateinit var sharedPreferences: SharedPreferences
+private val gson = Gson()
 
 class MainActivity : ComponentActivity() {
 
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        sharedPreferences = getSharedPreferences("taskflow_prefs", MODE_PRIVATE)
         enableEdgeToEdge()
         setContent {
             TaskflowTheme {
@@ -63,7 +97,14 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+data class Task(
+    val name: String,
+    val dueDate: String,
+    val importance: Float
+)
+
+@SuppressLint("AutoboxingStateCreation")
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Preview(
     showBackground = true,
     showSystemUi = true
@@ -72,83 +113,155 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun TaskFlow() {
     // State to hold the list of tasks
-    var taskList by remember { mutableStateOf(listOf<String>()) }
+    var taskList by remember { mutableStateOf(loadTasks()) }
     var currentTask by remember { mutableStateOf("") }
     var taskDate by remember { mutableStateOf("") }
     var taskImportance by remember { mutableFloatStateOf(0f) }
+    var isEditing by remember { mutableStateOf<Boolean>(false) }
+    var editIndex by remember { mutableIntStateOf(-1) }
+    var showWarning by remember { mutableStateOf(false) }
+    //for sorting
+    var selectedItem by remember { mutableStateOf("Select sort option") }
+    //var sortedTask by remember { mutableStateOf(taskList)}
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        // Input field for new tasks
+    TopAppBar(
+        title = {
+            Text(text = "TaskFlow")
+        },
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
+        navigationIcon = {
+            AppBarIcon(R.drawable.baseline_menu_24) {
+            }
+        },
+        actions = {
+            AppBarDateIcon(taskDate) { selectedDay ->
+                taskDate = selectedDay
+            }
+
+            AppBarIcon(R.drawable.baseline_more_vert_24) {
+            }
+        }
+    )
+
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(16.dp)) {
         Spacer(modifier = Modifier.height(100.dp))
 
         TaskInputField(currentTask) {
             currentTask = it
         }
 
-        DateInputField(taskDate) {
-            taskDate = it
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Column(modifier = Modifier.fillMaxWidth()) {
+            if (taskDate.isNotBlank()) {
+                Text(text = "Selected Day: $taskDate", modifier = Modifier.padding(8.dp))
+            } else {
+                Text(text = "Please select a date", modifier = Modifier.padding(8.dp))
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(text = "Importance: ${taskImportance.toInt()}", modifier = Modifier.padding(8.dp))
         }
 
         Spacer(modifier = Modifier.height(8.dp))
-        //importance slider
+
         ImportanceSlider(taskImportance) {
             taskImportance = it
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Button to add the new task to the list
         Button(
             onClick = {
-                if (currentTask.isNotBlank() && taskDate.isNotBlank()) {
-                    currentTask += "\nDue: " + taskDate + "\nImportance: " + taskImportance.toInt()
-                    taskList = taskList + currentTask
-                    currentTask = ""
-                    taskDate = ""
-                    taskImportance = 0f
+                if (currentTask.isNotBlank()) {
+                    if (taskDate.isBlank()) {
+                        showWarning = true
+                    } else {
+                        val newTask = Task(currentTask, taskDate, taskImportance)
+
+                        if (isEditing) {
+                            taskList = taskList.toMutableList().apply {
+                                set(editIndex, newTask)
+                            }
+                            isEditing = false
+                            editIndex = -1
+                        } else {
+                            taskList = taskList + newTask
+                        }
+                        saveTasks(taskList)
+                        currentTask = ""
+                        taskImportance = 0f
+                    }
                 }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Add Task")
+            Text(if (isEditing) "Edit Task" else "Add Task")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // List of tasks
-        TaskList(tasks = taskList) { task ->
-            taskList = taskList.filter { it != task }
+        SortDropdownMenu(selectedItem) {item ->
+            selectedItem = item
+            taskList = when (item) {
+                "Date" -> taskList.sortedBy { it.dueDate }
+                "Importance" -> taskList.sortedByDescending { it.importance }
+                else -> taskList.sortedBy { it.name }
+            }
         }
-    }
 
-    MaterialTheme {
-        Column {
-            TopAppBar(
-                title = {
-                    Text(text = "AppBar")
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
-                navigationIcon = {
-                    AppBarIcon(R.drawable.baseline_menu_24) {
 
+
+        LazyColumn(modifier = Modifier.weight(1f)) {
+            itemsIndexed(taskList) { index, task ->
+                TaskItem1(
+                    task = task,
+                    onRemove = { taskList = taskList.filter { it != task}
+                        saveTasks(taskList)
+                               },
+                    onEdit = {
+                        currentTask = task.name
+                        taskDate = task.dueDate
+                        taskImportance = task.importance
+                        isEditing = true
+                        editIndex = index
                     }
-                },
-                actions = {
-                    AppBarIcon(R.drawable.baseline_share_24) {
+                )
+            }
+        }
 
+        if (showWarning) {
+            AlertDialog(
+                onDismissRequest = { showWarning = false },
+                title = { Text(text = "Date not selected") },
+                text = { Text(text = "Please select a date before adding a task") },
+                confirmButton = {
+                    Button(onClick = { showWarning = false }) {
+                        Text("OK")
                     }
-                    AppBarIcon(R.drawable.baseline_edit_24) {
-
-                    }
-                    AppBarIcon(R.drawable.baseline_more_vert_24) {
-
-                    }
-
                 }
             )
         }
     }
 }
+
+// Function to save tasks to shared preferences
+private fun saveTasks(taskList: List<Task>) {
+    val json = gson.toJson(taskList)
+    sharedPreferences.edit().putString("task_list", json).apply()
+}
+
+
+// Function to load tasks from shared preferences
+private fun loadTasks(): List<Task> {
+    val json = sharedPreferences.getString("task_list", null) ?: return emptyList()
+    val type = object : TypeToken<List<Task>>() {}.type
+    return gson.fromJson(json, type)
+}
+
 
 @Composable
 fun AppBarIcon(icon: Int, onClick: () -> Unit) {
@@ -170,12 +283,15 @@ fun TaskInputField(task: String, onTaskChange: (String) -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         label = { Text(text = "Enter a new task") },
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-        keyboardActions = KeyboardActions(onDone = { /* Handle IME action here */ })
+        keyboardActions = KeyboardActions(onDone = { /* Handle IME action here */ }),
+        maxLines = 5, // set line limit to 5
+        singleLine = false
+
     )
 }
 
 @Composable
-fun DateInputField(date: String, onDateChange: (String) -> Unit) {
+fun AppBarDateIcon(taskDate: String, onDateChange: (String) -> Unit) {
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
@@ -190,23 +306,23 @@ fun DateInputField(date: String, onDateChange: (String) -> Unit) {
         }, year, month, day
     )
 
-    Text(
-        text = date.ifEmpty { "Choose a Date" },
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { datePickerDialog.show() }
-            .padding(16.dp)
-    )
+    datePickerDialog.datePicker.minDate = calendar.timeInMillis
+
+    IconButton(onClick = { datePickerDialog.show() }) {
+        Icon(
+            painter = painterResource(id = R.drawable.baseline_edit_calendar_24),
+            contentDescription = "Choose Date",
+            modifier = Modifier.size(24.dp)
+        )
+    }
 }
 
 @Composable
 fun ImportanceSlider(importance: Float, onImportanceChange: (Float) -> Unit) {
     Column {
-        Text("Importance: ${importance.toInt()}")
         Slider(
             value = importance,
             onValueChange = onImportanceChange,
-            //importance slider is for 0 to 3, i think it is enough
             valueRange = 0f..3f,
             steps = 2,
             modifier = Modifier.fillMaxWidth()
@@ -214,17 +330,43 @@ fun ImportanceSlider(importance: Float, onImportanceChange: (Float) -> Unit) {
     }
 }
 
+//Sort button
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskList(tasks: List<String>, onTaskRemove: (String) -> Unit) {
-    LazyColumn {
-        items(tasks.size) { index ->
-            TaskItem1(task = tasks[index], onRemove = onTaskRemove)
+fun SortDropdownMenu(selectedItem: String, onSortOptionSelected: (String) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    val items = listOf("Alphabetical", "Date", "Importance")
+
+    Box() {
+        TextField(
+            value = selectedItem,
+            onValueChange = { },
+            readOnly = true,
+            label = { Text("Sort") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            colors = ExposedDropdownMenuDefaults.textFieldColors(),
+            modifier = Modifier.fillMaxWidth().clickable{ expanded = !expanded },
+            enabled = false
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            items.forEach { item ->
+                DropdownMenuItem(
+                    onClick = {
+                        onSortOptionSelected(item)
+                        expanded = false
+                    },
+                    text = {Text(text = item)}
+                )
+            }
         }
     }
 }
 
 @Composable
-fun TaskItem(task: String, onRemove: (String) -> Unit) {
+fun TaskItem(task: Task, onRemove: () -> Unit, onEdit: () -> Unit) {
     Card(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 4.dp
@@ -233,26 +375,25 @@ fun TaskItem(task: String, onRemove: (String) -> Unit) {
             .fillMaxWidth()
             .padding(vertical = 4.dp)
     ) {
-        Row(
+        Row (
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = task,
-                modifier = Modifier
-                    .weight(1f)
-                    .alignByBaseline()
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = task.name)
+                Text(text = "Due: ${task.dueDate}")
+                Text(text = "Importance: ${task.importance.toInt()}")
+            }
 
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-            Button(
-                onClick = { onRemove(task) },
-                modifier = Modifier.alignByBaseline()
-            ) {
-                Text("Done")
+            Row(horizontalArrangement = Arrangement.End) {
+                Button(onClick = onEdit, modifier = Modifier.padding(end = 8.dp)) {
+                    Text("Edit")
+                }
+                Button(onClick = onRemove) {
+                    Text("Done")
+                }
             }
         }
     }

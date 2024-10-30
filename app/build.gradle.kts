@@ -71,4 +71,7 @@ dependencies {
 
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.compose.material.icons.extended)
+    //implementation("androidx.datastore:datastore-preferences:1.0.0") //?
+    //implementation("androidx.datastore:datastore:1.0.0") //?
+    implementation("com.google.code.gson:gson:2.8.9") // For JSON serialization of Task objects
 }
