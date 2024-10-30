@@ -54,9 +54,29 @@ import androidx.compose.ui.platform.LocalContext
 import java.util.Calendar
 
 import android.content.SharedPreferences
+import android.widget.ArrayAdapter
+import android.widget.Spinner
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.text2.input.rememberTextFieldState
+import androidx.compose.foundation.text2.input.setTextAndPlaceCursorAtEnd
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.core.content.ContentProviderCompat.requireContext
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlin.math.exp
 
 private lateinit var sharedPreferences: SharedPreferences
 private val gson = Gson()
@@ -84,7 +104,7 @@ data class Task(
 )
 
 @SuppressLint("AutoboxingStateCreation")
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Preview(
     showBackground = true,
     showSystemUi = true
@@ -180,6 +200,8 @@ fun TaskFlow() {
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        SortDropdownMenu()
 
         LazyColumn(modifier = Modifier.weight(1f)) {
             itemsIndexed(taskList) { index, task ->
@@ -290,6 +312,41 @@ fun ImportanceSlider(importance: Float, onImportanceChange: (Float) -> Unit) {
             steps = 2,
             modifier = Modifier.fillMaxWidth()
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SortDropdownMenu() {
+    var expanded by remember { mutableStateOf(false) }
+    val items = listOf("Date", "Importance")
+    var selectedItem by remember { mutableStateOf(items[0]) }
+
+    Box() {
+        TextField(
+            value = selectedItem,
+            onValueChange = { },
+            readOnly = true,
+            label = { Text("Sort") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            colors = ExposedDropdownMenuDefaults.textFieldColors(),
+            modifier = Modifier.fillMaxWidth().clickable{ expanded = !expanded },
+            enabled = false
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            items.forEach { item ->
+                DropdownMenuItem(
+                    onClick = {
+                        selectedItem = item
+                        expanded = false
+                    },
+                    text = {Text(text = item)}
+                )
+            }
+        }
     }
 }
 
