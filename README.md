@@ -16,7 +16,7 @@ Team members
 - [x] allow user to input due date of a entry
 - [x] toggle to show entries by importance
 - [x] toggle to show entries by due date
-- []  make UI prettier
+- [ ]  make UI prettier
 
 ## Retrospective
 
@@ -38,10 +38,17 @@ To run the app, clone the repo and open Android Studio and run the app there (wi
 
 ## Screenshots
 
+### Iteration 1
 ![Empty list](./images/emptyList.png)
+
 ![Adding one task](./images/oneTask.png)
+
 ![Adding multiple tasks](./images/twoTask.png)
+
 ![Select due Date](./images/dateSelect.png)
+
+### Iteration 2
 ![Feature tracking on Github Issues](./images/issuesOverview.png)
+
 ![Feature/Issue linking to pull and closing](./images/issueExample.png)
 
