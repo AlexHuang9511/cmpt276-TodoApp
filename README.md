@@ -39,14 +39,14 @@ To run the app, clone the repo and open Android Studio and run the app there (wi
 ## Screenshots
 
 ### Iteration 1
-[Empty list](./images/emptyList.png)
-<img src="./images/emptyList.png" alt="emptyList" width="200" height="300"/>
+<img src="./images/emptyList.png" alt="emptyList" width="200" height="400"/>
 
-![Adding one task](./images/oneTask.png)
+<img src="./images/oneTask.png" alt="one task" width="200" height="400"/>
 
-![Adding multiple tasks](./images/twoTask.png)
+<img src="./images/twoTask.png" alt="two tasks" width="200" height="400"/>
 
-![Select due Date](./images/dateSelect.png)
+<img src="./images/dateSelect.png" alt="date select" width="200" height="400"/>
+
 
 ### Iteration 2
 ![Feature tracking on Github Issues](./images/issuesOverview.png)
