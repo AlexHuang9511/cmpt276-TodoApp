@@ -42,6 +42,6 @@ To run the app, clone the repo and open Android Studio and run the app there (wi
 ![Adding one task](./images/oneTask.png)
 ![Adding multiple tasks](./images/twoTask.png)
 ![Select due Date](./images/dateSelect.png)
-![Feature tracking on Github Issues] (./images/issuesOverview.png)
-![Feature/Issue linking to pull and closing] (./images/issueExample.png)
+![Feature tracking on Github Issues](./images/issuesOverview.png)
+![Feature/Issue linking to pull and closing](./images/issueExample.png)
 
