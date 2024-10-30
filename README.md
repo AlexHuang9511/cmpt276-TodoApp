@@ -39,7 +39,8 @@ To run the app, clone the repo and open Android Studio and run the app there (wi
 ## Screenshots
 
 ### Iteration 1
-![Empty list](./images/emptyList.png)
+[Empty list](./images/emptyList.png)
+<img src="./images/emptyList.png" alt="emptyList" width="200" height="300"/>
 
 ![Adding one task](./images/oneTask.png)
 
