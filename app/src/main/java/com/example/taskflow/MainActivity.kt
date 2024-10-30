@@ -120,6 +120,9 @@ fun TaskFlow() {
     var isEditing by remember { mutableStateOf<Boolean>(false) }
     var editIndex by remember { mutableIntStateOf(-1) }
     var showWarning by remember { mutableStateOf(false) }
+    //for sorting
+    var selectedItem by remember { mutableStateOf("Select sort option") }
+    //var sortedTask by remember { mutableStateOf(taskList)}
 
     TopAppBar(
         title = {
@@ -201,7 +204,16 @@ fun TaskFlow() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        SortDropdownMenu()
+        SortDropdownMenu(selectedItem) {item ->
+            selectedItem = item
+            taskList = when (item) {
+                "Date" -> taskList.sortedBy { it.dueDate }
+                "Importance" -> taskList.sortedByDescending { it.importance }
+                else -> taskList.sortedBy { it.name }
+            }
+        }
+
+
 
         LazyColumn(modifier = Modifier.weight(1f)) {
             itemsIndexed(taskList) { index, task ->
@@ -315,12 +327,12 @@ fun ImportanceSlider(importance: Float, onImportanceChange: (Float) -> Unit) {
     }
 }
 
+//Sort button
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SortDropdownMenu() {
+fun SortDropdownMenu(selectedItem: String, onSortOptionSelected: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
-    val items = listOf("Date", "Importance")
-    var selectedItem by remember { mutableStateOf(items[0]) }
+    val items = listOf("Alphabetical", "Date", "Importance")
 
     Box() {
         TextField(
@@ -340,7 +352,7 @@ fun SortDropdownMenu() {
             items.forEach { item ->
                 DropdownMenuItem(
                     onClick = {
-                        selectedItem = item
+                        onSortOptionSelected(item)
                         expanded = false
                     },
                     text = {Text(text = item)}
