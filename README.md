@@ -39,13 +39,7 @@ To run the app, clone the repo and open Android Studio and run the app there (wi
 ## Screenshots
 
 ### Iteration 1
-<img src="./images/emptyList.png" alt="emptyList" width="200" height="400"/>
-
-<img src="./images/oneTask.png" alt="one task" width="200" height="400"/>
-
-<img src="./images/twoTask.png" alt="two tasks" width="200" height="400"/>
-
-<img src="./images/dateSelect.png" alt="date select" width="200" height="400"/>
+<img src="./images/emptyList.png" alt="emptyList" width="200" height="400"/> <img src="./images/oneTask.png" alt="one task" width="200" height="400"/> <img src="./images/twoTask.png" alt="two tasks" width="200" height="400"/> <img src="./images/dateSelect.png" alt="date select" width="200" height="400"/>
 
 
 ### Iteration 2
