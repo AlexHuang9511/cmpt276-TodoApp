@@ -52,12 +52,12 @@ To run the app, clone the repo and open Android Studio and run the app there (wi
 <img src="./images/issuesOverview.png" alt="Feature tracking on Github Issues" width="500"/>
 <img src="./images/issueExample.png" alt="Feature/Issue linking to pull and closing" width="500"/>
 
-#### Sorting Feature
+#### New Sorting Feature 
 
 <table>
   <tr>
     <td style="text-align: center;">
-      <img src="images/SortDate.png" alt="Sorting by Date" width="250"/>
+      <img src="images/SortDate.png" alt="Sorting by Due Date" width="250"/>
       <p>Sorting by Date</p>
     </td>
     <td style="text-align: center;">
