@@ -52,6 +52,7 @@ To run the app, clone the repo and open Android Studio and run the app there (wi
 
 ![Feature/Issue linking to pull and closing](./images/issueExample.png)
 
+#### Sorting
 
 <table>
   <tr>
