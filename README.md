@@ -53,12 +53,12 @@ To run the app, clone the repo and open Android Studio and run the app there (wi
 ![Feature/Issue linking to pull and closing](./images/issueExample.png)
 
 #### Sorting by Date
-![Task Entry and Sorting by Date](images/SortDate.png)
+<img src="images/SortDate.png" alt="Sorting by Date" width="200" height="400"/>
 
 #### Sorting by Importance
-![Sorting by Importance](images/SortImpt.png)
+<img src="images/SortImpt.png" alt="Sorting by Importance" width="200" height="400"/>
 
 #### Sorting Alphabetically
-![Sorting Alphabetically](images/SortAlpha.png)
+<img src="images/SortAlpha.png" alt="Sorting by Alphabetically" width="200" height="400"/>
 
 
