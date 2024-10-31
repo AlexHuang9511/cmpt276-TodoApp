@@ -48,9 +48,9 @@ To run the app, clone the repo and open Android Studio and run the app there (wi
 
 
 ### Iteration 2
-![Feature tracking on Github Issues](./images/issuesOverview.png)
 
-![Feature/Issue linking to pull and closing](./images/issueExample.png)
+<img src="./images/issuesOverview.png" alt="Feature tracking on Github Issues" width="300"/>
+<img src="./images/issueExample.png" alt="Feature/Issue linking to pull and closing" width="300"/>
 
 #### Sorting Feature
 
