@@ -62,15 +62,15 @@ To run the app, clone the repo and open Android Studio and run the app there (wi
 <table>
   <tr>
     <td style="text-align: center;">
-      <img src="images/SortDate.png" alt="Sorting by Date" width="300"/>
+      <img src="images/SortDate.png" alt="Sorting by Date" width="200"/>
       <p>Sorting by Date</p>
     </td>
     <td style="text-align: center;">
-      <img src="images/SortImpt.png" alt="Sorting by Importance" width="300"/>
+      <img src="images/SortImpt.png" alt="Sorting by Importance" width="200"/>
       <p>Sorting by Importance</p>
     </td>
     <td style="text-align: center;">
-      <img src="images/SortAlpha.png" alt="Sorting Alphabetically" width="300"/>
+      <img src="images/SortAlpha.png" alt="Sorting Alphabetically" width="200"/>
       <p>Sorting Alphabetically</p>
     </td>
   </tr>
